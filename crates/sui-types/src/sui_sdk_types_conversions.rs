@@ -137,6 +137,9 @@ impl From<crate::object::Owner> for Owner {
                 start_version: _,
                 authenticator: _,
             } => todo!(),
+            // TODO: should read:
+            // crate::object::Owner::Ephemeral(digest) => Self::Ephemeral(digest.into()),
+            crate::object::Owner::Ephemeral(_digest) => todo!(),
         }
     }
 }

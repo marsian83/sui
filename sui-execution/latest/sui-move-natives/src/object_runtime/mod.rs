@@ -303,6 +303,13 @@ impl<'a> ObjectRuntime<'a> {
         Ok(transfer_result)
     }
 
+    pub fn merge(&mut self, owner: Owner, ty: Type, obj: Value) -> PartialVMResult<()> {
+        assert!(matches!(owner, Owner::Ephemeral(_)));
+
+        self.transfer(owner, ty, obj)?;
+        Ok(())
+    }
+
     pub fn emit_event(&mut self, ty: Type, tag: StructTag, event: Value) -> PartialVMResult<()> {
         if self.state.events.len() >= (self.protocol_config.max_num_event_emit() as usize) {
             return Err(max_event_error(self.protocol_config.max_num_event_emit()));

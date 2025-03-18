@@ -3,6 +3,7 @@
 
 use self::{
     address::{AddressFromBytesCostParams, AddressFromU256CostParams, AddressToU256CostParams},
+    auth_stream::AddToAuthStreamCostParams,
     config::ConfigReadSettingImplCostParams,
     crypto::{bls12381, ecdsa_k1, ecdsa_r1, ecvrf, ed25519, groth16, hash, hmac},
     crypto::{
@@ -70,6 +71,7 @@ use sui_types::{MOVE_STDLIB_ADDRESS, SUI_FRAMEWORK_ADDRESS, SUI_SYSTEM_ADDRESS};
 use transfer::TransferReceiveObjectInternalCostParams;
 
 mod address;
+mod auth_stream;
 mod config;
 mod crypto;
 mod dynamic_field;
@@ -108,6 +110,7 @@ pub struct NativesCostTable {
 
     // Event natives
     pub event_emit_cost_params: EventEmitCostParams,
+    pub add_to_auth_stream_cost_params: AddToAuthStreamCostParams,
 
     // Object
     pub borrow_uid_cost_params: BorrowUidCostParams,
@@ -945,6 +948,11 @@ pub fn all_natives(silent: bool, protocol_config: &ProtocolConfig) -> NativeFunc
             make_native!(ed25519::ed25519_verify),
         ),
         ("event", "emit", make_native!(event::emit)),
+        (
+            "event",
+            "add_stream_commitment",
+            make_native!(auth_stream::add_stream_commitment),
+        ),
         (
             "event",
             "events_by_type",

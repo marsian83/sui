@@ -487,6 +487,8 @@ pub enum Owner {
         /// The authentication mode of the object
         authenticator: Box<Authenticator>,
     },
+    /// An ephemeral object is created by a transaction to represent a side effect of
+    Ephemeral(TransactionDigest),
 }
 
 #[derive(
@@ -519,7 +521,8 @@ impl Owner {
             Self::Shared { .. }
             | Self::Immutable
             | Self::ObjectOwner(_)
-            | Self::ConsensusV2 { .. } => Err(SuiError::UnexpectedOwnerType),
+            | Self::ConsensusV2 { .. }
+            | Self::Ephemeral(_) => Err(SuiError::UnexpectedOwnerType),
         }
     }
 
@@ -528,9 +531,10 @@ impl Owner {
     pub fn get_owner_address(&self) -> SuiResult<SuiAddress> {
         match self {
             Self::AddressOwner(address) | Self::ObjectOwner(address) => Ok(*address),
-            Self::Shared { .. } | Self::Immutable | Self::ConsensusV2 { .. } => {
-                Err(SuiError::UnexpectedOwnerType)
-            }
+            Self::Shared { .. }
+            | Self::Immutable
+            | Self::ConsensusV2 { .. }
+            | Self::Ephemeral(_) => Err(SuiError::UnexpectedOwnerType),
         }
     }
 
@@ -541,7 +545,9 @@ impl Owner {
                 initial_shared_version,
             } => Some(*initial_shared_version),
             Self::ConsensusV2 { start_version, .. } => Some(*start_version),
-            Self::Immutable | Self::AddressOwner(_) | Self::ObjectOwner(_) => None,
+            Self::Immutable | Self::AddressOwner(_) | Self::ObjectOwner(_) | Self::Ephemeral(_) => {
+                None
+            }
         }
     }
 
@@ -574,7 +580,8 @@ impl PartialEq<ObjectID> for Owner {
             Self::AddressOwner(_)
             | Self::Shared { .. }
             | Self::Immutable
-            | Self::ConsensusV2 { .. } => false,
+            | Self::ConsensusV2 { .. }
+            | Self::Ephemeral(_) => false,
         }
     }
 }
@@ -606,6 +613,9 @@ impl Display for Owner {
                     start_version.value(),
                     authenticator
                 )
+            }
+            Self::Ephemeral(digest) => {
+                write!(f, "Ephemeral( {} )", digest)
             }
         }
     }
@@ -932,7 +942,9 @@ impl ObjectInner {
             Owner::AddressOwner(_)
             | Owner::ObjectOwner(_)
             | Owner::Shared { .. }
-            | Owner::Immutable => DEFAULT_OWNER_SIZE,
+            | Owner::Immutable
+            // Note: Ephemeral objects are "owned" by a tx digest, which is the same size as a SuiAddress
+            | Owner::Ephemeral(_) => DEFAULT_OWNER_SIZE,
             Owner::ConsensusV2 { authenticator, .. } => {
                 DEFAULT_OWNER_SIZE
                     + match authenticator.as_ref() {

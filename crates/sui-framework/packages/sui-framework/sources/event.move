@@ -37,6 +37,20 @@ module sui::event;
 /// phantom parameters, eg `emit(MyEvent<phantom T>)`.
 public native fun emit<T: copy + drop>(event: T);
 
+public struct EventStream has store {
+    id: UID,
+}
+
+public fun new_event_stream(ctx: &mut TxContext): EventStream {
+    EventStream {
+        id: object::new(ctx),
+    }
+}
+
+/// Like `emit`, but also adds an on-chain committment to the event to the
+/// stream `stream`.
+public native fun emit_authenticated<T: copy + drop>(stream: &EventStream, event: T);
+
 #[test_only]
 /// Get the total number of events emitted during execution so far
 public native fun num_events(): u32;
