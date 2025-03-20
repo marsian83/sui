@@ -607,6 +607,9 @@ fn transaction_effects(
             Owner::ConsensusV2 { .. } => {
                 unimplemented!("ConsensusV2 does not exist for this execution version")
             }
+            Owner::Ephemeral(_) => {
+                unimplemented!("Ephemeral does not exist for this execution version")
+            }
         }
     }
 

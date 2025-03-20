@@ -98,6 +98,7 @@ impl StoredObjInfo {
                 // In the future, if we support more sophisticated authenticator,
                 // this will be changed.
                 Owner::ConsensusV2 { .. } => StoredOwnerKind::Address,
+                Owner::Ephemeral { .. } => todo!(),
             }),
 
             owner_id: match object.owner() {
@@ -107,6 +108,7 @@ impl StoredObjInfo {
                 Owner::ConsensusV2 { authenticator, .. } => {
                     Some(authenticator.as_single_owner().to_vec())
                 }
+                Owner::Ephemeral { .. } => todo!(),
             },
 
             package: type_.map(|t| t.address().to_vec()),

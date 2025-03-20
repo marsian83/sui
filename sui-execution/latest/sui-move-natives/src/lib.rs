@@ -71,7 +71,6 @@ use sui_types::{MOVE_STDLIB_ADDRESS, SUI_FRAMEWORK_ADDRESS, SUI_SYSTEM_ADDRESS};
 use transfer::TransferReceiveObjectInternalCostParams;
 
 mod address;
-mod auth_stream;
 mod config;
 mod crypto;
 mod dynamic_field;
@@ -110,7 +109,6 @@ pub struct NativesCostTable {
 
     // Event natives
     pub event_emit_cost_params: EventEmitCostParams,
-    pub add_to_auth_stream_cost_params: AddToAuthStreamCostParams,
 
     // Object
     pub borrow_uid_cost_params: BorrowUidCostParams,
@@ -296,6 +294,7 @@ impl NativesCostTable {
                     .event_emit_output_cost_per_byte()
                     .into(),
                 event_emit_cost_base: protocol_config.event_emit_cost_base().into(),
+                event_emit_auth_stream_cost: protocol_config.event_emit_auth_stream_cost().into(),
             },
 
             borrow_uid_cost_params: BorrowUidCostParams {

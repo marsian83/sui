@@ -1958,6 +1958,9 @@ impl TransactionData {
                 Owner::ObjectOwner(_) => {
                     return Err(anyhow::anyhow!("Upgrade capability controlled by object"))
                 }
+                Owner::Ephemeral(_) => {
+                    return Err(anyhow::anyhow!("Upgrade capability is ephemeral"))
+                }
             };
             builder.obj(capability_arg).unwrap();
             let upgrade_arg = builder.pure(upgrade_policy).unwrap();

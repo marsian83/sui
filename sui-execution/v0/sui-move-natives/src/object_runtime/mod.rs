@@ -512,6 +512,9 @@ impl ObjectRuntimeState {
                 Owner::ConsensusV2 { .. } => {
                     unimplemented!("ConsensusV2 does not exist for this execution version")
                 }
+                Owner::Ephemeral(_) => {
+                    unimplemented!("Ephemeral does not exist for this execution version")
+                }
             })
             .collect();
         // update the input owners with the new owners from transfers

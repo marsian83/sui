@@ -243,6 +243,9 @@ pub fn end_transaction(
                     .or_default()
                     .insert(id);
             }
+            Owner::Ephemeral(_) => {
+                todo!()
+            }
         }
     }
 

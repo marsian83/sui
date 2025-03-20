@@ -487,6 +487,11 @@ fn resolve_object(
             tonic::Code::InvalidArgument,
             format!("object {object_id} is object owned and cannot be used as an input"),
         )),
+        // ephemeral objects do not even have IDs so it will be very difficult to get here.
+        sui_types::object::Owner::Ephemeral { .. } => Err(RpcError::new(
+            tonic::Code::InvalidArgument,
+            format!("object {object_id} is ephemeral and cannot be used as an input"),
+        )),
     }
 }
 

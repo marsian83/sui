@@ -154,6 +154,9 @@ pub fn end_transaction(
             Owner::ConsensusV2 { .. } => {
                 unimplemented!("ConsensusV2 does not exist for this execution version")
             }
+            Owner::Ephemeral(_) => {
+                unimplemented!("Ephemeral does not exist for this execution version")
+            }
         }
     }
     // deletions already handled above, but we drop the delete kind for the effects
@@ -603,6 +606,9 @@ fn transaction_effects(
             Owner::Immutable => frozen.push(id),
             Owner::ConsensusV2 { .. } => {
                 unimplemented!("ConsensusV2 does not exist for this execution version")
+            }
+            Owner::Ephemeral(_) => {
+                unimplemented!("Ephemeral does not exist for this execution version")
             }
         }
     }
