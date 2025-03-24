@@ -112,8 +112,8 @@ pub struct Indexer {
     handles: Vec<JoinHandle<()>>,
 }
 
+// TODO (wlmyng): non-pg store impl<S: TransactionalStore> Indexer<S> {
 impl Indexer {
-    // impl<S: TransactionalStore> Indexer<S> {
     /// Create a new instance of the indexer framework. `database_url`, `db_args`, `indexer_args,`,
     /// `client_args`, and `ingestion_config` contain configurations for the following,
     /// respectively:
@@ -248,7 +248,11 @@ impl Indexer {
         &mut self,
         handler: H,
         config: ConcurrentConfig,
-    ) -> Result<()> {
+    ) -> Result<()>
+    where
+        // TODO (wlmyng): eventually this will be Handler<Store = S>
+        H: concurrent::Handler<Store = Db> + Send + Sync + 'static,
+    {
         let start_from_pruner_watermark = H::PRUNING_REQUIRES_PROCESSED_VALUES;
         let Some(watermark) = self.add_pipeline::<H>(start_from_pruner_watermark).await? else {
             return Ok(());
@@ -261,7 +265,7 @@ impl Indexer {
             self.check_first_checkpoint_consistency::<H>(&watermark)?;
         }
 
-        self.handles.push(concurrent::pipeline(
+        self.handles.push(concurrent::pipeline::<H>(
             handler,
             watermark,
             config,
@@ -471,6 +475,7 @@ mod tests {
     use async_trait::async_trait;
 
     use crate::types::full_checkpoint_content::CheckpointData;
+    use store::Store;
 
     use super::*;
 
@@ -498,10 +503,14 @@ mod tests {
 
             #[async_trait]
             impl concurrent::Handler for $name {
+                // TODO (wlmyng): For testing, we should replace sui_pg_db::Db with a mock, like an
+                // in-memory store, that doesn't have external dependencies
+                type Store = Db;
+
                 const PRUNING_REQUIRES_PROCESSED_VALUES: bool = $pruning_requires_processed_values;
-                async fn commit(
+                async fn commit<'a>(
                     _values: &[Self::Value],
-                    _conn: &mut db::Connection<'_>,
+                    _conn: &mut <Self::Store as Store>::Connection<'a>,
                 ) -> anyhow::Result<usize> {
                     todo!()
                 }
